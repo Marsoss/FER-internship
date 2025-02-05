@@ -9,3 +9,5 @@ torchsummary
 polarTransform
 imageio
 tqdm
+linformer
+vit_pytorch
