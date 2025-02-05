@@ -389,9 +389,9 @@ class CNNTrainer:
 
 def main_trainer():
 
-    LR = 0.0001
-    EPOCHS = 100
-    PATIENCE = 5
+    LR = 0.001
+    EPOCHS = 10
+    PATIENCE = 3
     
     
     model_name = "unet1"
@@ -404,7 +404,7 @@ def main_trainer():
 
     torch.cuda.empty_cache()
 
-    trainer = CNNTrainer(Path(dataset_path), model_name=model_name, color_mode='rgb')
+    trainer = CNNTrainer(Path(dataset_path), model_name=model_name, color_mode='grayscale')
 
     model_file = f'models\{model_name}_{dataset_name}.pth'
 
@@ -412,7 +412,7 @@ def main_trainer():
 
     num_channels = 1
     num_classes = 8
-    width = height = 300
+    width = height = 48
 
     trainer.print_workspace()
     trainer.load_data()
