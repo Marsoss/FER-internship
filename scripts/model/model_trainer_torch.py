@@ -145,7 +145,7 @@ class CNNTrainer:
             elif num_images==2:
                 num_rows = 1
                 num_cols = 2
-                fig, ax = plt.subplots(ncols=num_cols, figsize=(10,10))
+                _, ax = plt.subplots(ncols=num_cols, figsize=(10,10))
                 for idx, img in enumerate(batch[0][:num_images]):
                     ax[idx].imshow(img.astype(int), cmap='gray')
                     ax[idx].title.set_text(self.__class_names[batch[1][idx]])
@@ -155,7 +155,7 @@ class CNNTrainer:
                 num_cols = 1
                 num_rows = 1
                 div = 1
-                fig, ax = plt.subplots(figsize=(10,10))
+                _, ax = plt.subplots(figsize=(10,10))
                 img = batch[0][0]
                 ax.imshow(img.astype(int), cmap='gray')
                 ax.title.set_text(self.__class_names[batch[1][0]])
@@ -163,7 +163,7 @@ class CNNTrainer:
                 return
         
             
-            fig, ax = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(10,10))
+            _, ax = plt.subplots(nrows=num_rows, ncols=num_cols, figsize=(10,10))
             for idx, img in enumerate(batch[0][:num_images]):
                 ax[idx%div, idx//div].imshow(img.astype(int), cmap='gray')
                 ax[idx%div, idx//div].title.set_text(self.__class_names[batch[1][idx]])
@@ -248,7 +248,7 @@ class CNNTrainer:
 
         # Optimizer
         if optimizer is None:
-            optimizer = optim.Adam(self.__model.parameters(), lr=0.001)
+            optimizer = optim.Adam(self.__model.parameters(), lr=0.001, weight_decay=1e-5)
         
         es = EarlyStopping(patience=patience)
 
