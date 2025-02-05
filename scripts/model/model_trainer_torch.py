@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from torchsummary import summary
 
 
-from tqdm import tq
+from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 import numpy as np
