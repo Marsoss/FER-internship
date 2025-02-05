@@ -396,7 +396,7 @@ def main_trainer():
     
     model_name = "unet1"
 
-    dataset_name = "affecnet"
+    dataset_name = "FER2013"
 
     dataset_path = f"../datasets/{dataset_name}"
 
@@ -422,7 +422,7 @@ def main_trainer():
 
     param = trainer.get_parameters()
 
-    optimizer = optim.Adam(param, lr=LR)
+    optimizer = optim.Adam(param, lr=LR, weight_decay=1e-5)
     criterion = nn.CrossEntropyLoss()
 
     trainer.train(patience=PATIENCE, criterion=criterion, optimizer=optimizer, epochs=EPOCHS)
