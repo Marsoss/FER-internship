@@ -31,8 +31,8 @@ The main dependencies include:
 
 ## 📥 Dataset
 
-You can download the dataset used for training and testing from the following link:
-[FER2013](https://www.kaggle.com/datasets/msambare/fer2013)
+You can download the dataset used for training and testing from the following link: [FER2013](https://www.kaggle.com/datasets/msambare/fer2013)
+Extract it in the folder where you cloned the project.
 
 ## 🏋️ Training the Model
 
