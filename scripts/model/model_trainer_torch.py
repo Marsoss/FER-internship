@@ -8,7 +8,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchsummary import summary
 
-
+import os
 from tqdm import tqdm
 
 import matplotlib.pyplot as plt
@@ -352,29 +352,29 @@ class CNNTrainer:
         else:
             print('You need to set a model first, use method set_model() or prepare_training()')
 
-    def __show_loss(self, save_name:str):
+    def __show_loss(self, save_name:str, show:bool=True):
         plt.figure(figsize=(10, 5))
         plt.plot(np.arange(1, self.__epoch+1), np.array(self.__t_loss), label='train loss')
         plt.plot(np.arange(1, self.__epoch+1), np.array(self.__v_loss), label='validation loss')
         plt.legend()
         plt.xlabel('Epoch')
         plt.savefig(save_name)
-        plt.show()
+        if show: plt.show()
 
-    def __show_accuracy(self, save_name:str):
+    def __show_accuracy(self, save_name:str, show:bool=True):
         plt.figure(figsize=(10,5))
         plt.plot(np.arange(1, self.__epoch+1), np.array(self.__t_acc), label='training accuracy')
         plt.plot(np.arange(1, self.__epoch+1), np.array(self.__v_acc), label='validation accuracy')
         plt.legend()
         plt.xlabel('Epoch')
         plt.savefig(save_name)
-        plt.show()
+        if show: plt.show()
 
-    def show_plot(self, save_plot_path:Path) -> None:
+    def show_plot(self, save_plot_path:Path, show:bool=True) -> None:
         if self.__training_done:
             # plot the metrics over time
-            self.__show_loss(f"{save_plot_path}_loss.png")
-            self.__show_accuracy(f"{save_plot_path}_accuracy.png")
+            self.__show_loss(f"{save_plot_path}_loss.png", show=show)
+            self.__show_accuracy(f"{save_plot_path}_accuracy.png", show=show)
         else:
             print("No plot: You must train the model first")
 
@@ -382,37 +382,60 @@ class CNNTrainer:
         if not save_name:
             dataset = Path(self.__data_folder).name
             save_name = f'{self.__model_name}_{dataset}.pth'
+        os.makedirs('models', exist_ok=True)
         save_path =  Path('models', save_name)
         torch.save(self.__model.state_dict(), save_path)
         print(f'Model saved as { save_path}')
 
 
+def get_optimizer(optimizer_type:str, param, lr:float) -> optim:
+    if optimizer_type.lower() == "adam":
+        return optim.Adam(param, lr=lr, weight_decay=1e-5)
+    elif optimizer_type.lower() == "sgd":
+        return optim.SGD(param, lr=lr, momentum=0.9, weight_decay=1e-5)
+    else:
+        raise ValueError("Unsupported optimizer type")
+
+def get_criterion(criterion_type:str) -> nn.modules.loss:
+    if criterion_type.lower() == "cross_entropy":
+        return nn.CrossEntropyLoss()
+    elif criterion_type.lower() == "mse":
+        return nn.MSELoss()
+    else:
+        raise ValueError("Unsupported criterion type")
+
 def main_trainer():
-
-    LR = 0.001
-    EPOCHS = 10
-    PATIENCE = 3
+    import argparse
+    parser = argparse.ArgumentParser(description="Train a CNN model.")
+    parser.add_argument('--model', type=str, default="unet1", help='Model name')
+    parser.add_argument('--dataset_path', type=str, default="../datasets/FER2013", help='Dataset name')
+    parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
+    parser.add_argument('--epochs', type=int, default=10, help='Number of epochs')
+    parser.add_argument('--patience', type=int, default=3, help='Patience for early stopping')
+    parser.add_argument('--optimizer', type=str, default="adam", help='Optimizer type (adam, sgd)')
+    parser.add_argument('--criterion', type=str, default="cross_entropy", help='Loss criterion (cross_entropy, mse)')
+    parser.add_argument('--show', type=bool, default=True, help='Show the plot of training')
     
-    
-    model_name = "unet1"
+    args = parser.parse_args()
 
-    dataset_name = "FER2013"
+    model_name = args.model
+    LR = args.lr
+    EPOCHS = args.epochs
+    PATIENCE = args.patience
+    optimizer_type = args.optimizer
+    criterion_type = args.criterion
+    show = args.show
 
-    dataset_path = f"../datasets/{dataset_name}"
-
+    dataset_path = args.dataset_path
+    dataset_name = Path(dataset_path).name
     plot_save_name = f"results/{model_name}_{dataset_name}"
+    os.makedirs(plot_save_name, exist_ok=True)
 
     torch.cuda.empty_cache()
 
     trainer = CNNTrainer(Path(dataset_path), model_name=model_name, color_mode='grayscale')
 
-    model_file = f'models\{model_name}_{dataset_name}.pth'
-
     save_name = f'{model_name}_{dataset_name}.pth'
-
-    num_channels = 1
-    num_classes = 8
-    width = height = 48
 
     trainer.print_workspace()
     trainer.load_data()
@@ -422,12 +445,13 @@ def main_trainer():
 
     param = trainer.get_parameters()
 
-    optimizer = optim.Adam(param, lr=LR, weight_decay=1e-5)
-    criterion = nn.CrossEntropyLoss()
+    optimizer = get_optimizer(optimizer_type, param, LR)
+
+    criterion = get_criterion(criterion_type)
 
     trainer.train(patience=PATIENCE, criterion=criterion, optimizer=optimizer, epochs=EPOCHS)
     trainer.save(save_name=save_name)
-    trainer.show_plot(Path(plot_save_name))
+    trainer.show_plot(Path(plot_save_name), show=show)
 
 if __name__ == "__main__":
     main_trainer()

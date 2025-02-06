@@ -6,9 +6,12 @@ import torch.nn as nn
 
 from PIL import Image
 
+import argparse
+from pathlib import Path
+
 import random
 import os
-from typing import List
+from typing import List, Tuple
 
 from metrics import recall_score, precision, conf_matrix, plot_confusion_matrix, f1_score, accuracy
 
@@ -26,12 +29,19 @@ from model import create_model
 def get_num_channel(color_mode:str, model_name:str) -> int:
     return 1 if color_mode != 'rgb' and model_name.lower() not in ['vgg', 'inception', 'resnet'] else 3
 
-def choose_filename(file_filter) -> str:
+def get_image_size(dataset_path) -> Tuple[int,int]:
+    folder_path = os.path.join(dataset_path,"test", "angry")
+    first_image = os.listdir(folder_path)[0]
+    image_path = os.path.join(folder_path, first_image)
+    print(image_path)
+    image = Image.open(image_path)
+    return image.size
+
+def choose_filename(file_filter, start_folder:str='.') -> str:
     root = tk.Tk()
     root.withdraw()
-    current_dir = os.getcwd()
-    file_path = filedialog.askopenfilename(initialdir=current_dir, filetypes=file_filter)
-    return os.path.relpath(file_path, current_dir)
+    file_path = filedialog.askopenfilename(initialdir=start_folder, filetypes=file_filter)
+    return os.path.relpath(file_path)
 
 def create_preprocess_function(height:int, width:int, color_mode:str):
     size = (height, width)
@@ -56,26 +66,28 @@ def get_classes(num_classes:int) -> List[str]:
         return ['anger', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 
 def num_classes_dataset(dataset:str) -> int:
-    return len(os.listdir(dataset))
+    return len(os.listdir(f'{dataset}/test'))
 class CNNTester:
-    def __init__(self, model_name:str, dataset:str="FER2013", tr_height:int=48, tr_width:int=48, model_color_mode:str='rgb') -> None:
+    def __init__(self, model_name:str, dataset_path:str="../datasets/FER2013", model_color_mode:str='rgb') -> None:
         
         # Classes
-        self.__dataset:str = f'../datasets/{dataset}/test'
+        self.__dataset:str = dataset_path
         self.__num_classes:int = num_classes_dataset(self.__dataset)
+        
 
         #Model
-        if not model_name:
+        if model_name is None:
             self.choose_model()
         else:
-            self.__model_name:str = model_name
+            self.model_name:str = model_name
         self.__batch_size:int = 16
-        self.__tr_height:int = tr_height
-        self.__tr_width:int =  tr_width
-        self.__tr_size = self.__tr_width, self.__tr_height
-        self.__num_channels:int = get_num_channel(color_mode=model_color_mode, model_name=model_name)
-        self.__model:nn.Module = create_model(model_name=model_name, height=tr_height, width=tr_width, num_channels=self.__num_channels, num_classes=self.__num_classes)
-        print(type(self.__model))
+        self.__tr_size = get_image_size(self.__dataset)
+        self.__tr_height:int = self.__tr_size[1]
+        self.__tr_width:int =  self.__tr_size[0]
+        
+        s = Path(self.model_name).stem
+        self.__num_channels:int = get_num_channel(color_mode=model_color_mode, model_name=s[:s.find("_")])
+        self.__model:nn.Module = create_model(model_name=self.model_name, height=self.__tr_height, width=self.__tr_width, num_channels=self.__num_channels, num_classes=self.__num_classes)
 
         #Data
         if self.__num_classes != self.__model.classifier[-1].out_features: # TODO: Verify classifier[-1] on other models
@@ -88,7 +100,7 @@ class CNNTester:
         self.__image_name:str = ''
         self.__emotion:str
         
-        self.__preprocess:transforms.Compose =  create_preprocess_function(tr_height, tr_width, model_color_mode)
+        self.__preprocess:transforms.Compose =  create_preprocess_function(self.__tr_height, self.__tr_width, model_color_mode)
 
     def __get_random_img(self) -> str:
         emotion = input(f"Give emotion among {self.__class_names}")
@@ -118,7 +130,8 @@ class CNNTester:
         return self.__class_names[predicted.item()]
     
     def load_model(self) -> None:
-        checkpoint = torch.load(self.__model_name)
+        print(self.model_name)
+        checkpoint = torch.load(self.model_name)
         state_dict = checkpoint
         print("loading dict")
         self.__model.load_state_dict(state_dict)
@@ -148,14 +161,14 @@ class CNNTester:
             self.set_image(image_name, emotion_label=emotion)
         else:    
             self.choose_image()
-        if self.__model_name == '':
+        if self.model_name == '':
             self.choose_model()
         self.__print_prediction()
         if show:
             self.__image.show()
 
     def set_model_name(self, model_name:str) -> None:
-        self.__model_name = model_name
+        self.model_name = model_name
 
     def choose_image(self) -> None:
         print("choose an image file to test")
@@ -167,8 +180,8 @@ class CNNTester:
     def choose_model(self) -> None:
         print("choose a model to test")
         file_filter = [("PTH Files", "*.pth")]
-        file_path = choose_filename(file_filter)
-        self.__model_name = file_path    
+        file_path = choose_filename(file_filter, start_folder='models')
+        self.model_name = file_path    
 
     def load_data(self) -> None:
         print("loading data...")
@@ -223,7 +236,7 @@ def test_model(tester):
     image_name = 'images\me_happy.jpg'
     tester.test(image_name,emotion='happy')
 
-def test_set(tester, matrix_save_name:str='confusion_matrix.png'):
+def test_set(tester, matrix_save_name:str='confusion_matrix.png', show:bool=True):
     tester.load_data()
     tester.load_model()
 
@@ -234,20 +247,28 @@ def test_set(tester, matrix_save_name:str='confusion_matrix.png'):
     tester.recall_score()
     plt.figure()
     tester.plot_confusion_matrix(normalize=True)
-    plt.show()
+    if show: plt.show()
     
 
 def main_test():
-    model_name = 'models/unet1_FER2013.pth'
+    parser = argparse.ArgumentParser(description='Test a CNN model on a dataset')
+    parser.add_argument('--model_path', type=str, default=None, help='Path to the model file')
+    parser.add_argument('--dataset_path', type=str, default='../datasets/FER2013', help='Path to the dataset')
+    parser.add_argument('--model_color_mode', type=str, default='grayscale', help='Color mode of the model (rgb or grayscale)')
+    parser.add_argument('--show', type=bool, default=True, help='Shows the confusion matrix plot')
+
+    args = parser.parse_args()
+    model_name = None
+    if args.model_path is not None: 
+        model_name = args.model_path
 
     tester = CNNTester(model_name=model_name,  
-                    tr_height=48, 
-                    tr_width=48,
-                    model_color_mode='grayscale')
+                    dataset_path=args.dataset_path,
+                    model_color_mode=args.model_color_mode)
     
     tester.load_model()
     
-    test_set(tester, 'results/Unet1_matrix.png')
+    test_set(tester, f'confusion_matrix_{Path(tester.model_name).stem}.png', show=args.show)
 
 if __name__=='__main__':
     main_test()
