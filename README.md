@@ -1,49 +1,125 @@
-# Facial Emotion Recognition internship 2A
+# Facial Emotion Recognition internship
 
+## 📌Summary
 
+This work is the result of a research study about **FER** (Facial Emotion Recognition). The aim was to compare different machine learning models and potentially improve the state-of-the-art results. You can find a trainer class for **Convolutionnal Neural Networks** (CNN) and another for traditionnal machine learning classifier as SVM or KNN. They both have their own testing class computing the confusion matrix and other important metrics as precision, recall or F1-score. The dataset used is **FER-2013** and preprocessing functions are available to be applied to an entire folder. You will also find a camera file, so you can use the camera of your own device for testing. 
 
-## Description
+## ⚙️ Installation
 
-This work is the result of a research study about FER (Facial Emotion Recognition). The aim was to compare different machine learning models and potentially improve the state-of-the-art results. You can find a trainer class for Convolutionnal Neural Networks (CNN) and another for traditionnal machine learning classifier as SVM or KNN. They both have their own testing class computing the confusion matrix and other important metrics as precision, recall or F1-score. The dataset used is FER-2013 and preprocessing functions are available to be applied to an entire folder. You will also find a camera file, so you can use the camera of your own device for testing. 
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Installation
-
-Make sure you have every library needed to run this project:
-
+### Advice
+Create a dedicated environment and activate it
+```bash
+python -m venv /path/to/new/virtual/environment
+.\environment\Scripts\activate  
 ```
+
+### Prerequisites
+Make sure you have Python installed (preferably Python 3.9+):
+```bash
 python3 -m pip install --upgrade pip
-pip install --upgrade pathlib typing Pillow tk
-pip install --upgrade numpy matplotlib tqdm
-pip install --upgarde torch torchvision sklearn
-pip install --upgarde segmentation linformer vit_pytorch 
-pip install --upgrade opencv-python
-
+pip install -r requirements.txt
 ```
 
-## Usage
+### Required Libraries
+The main dependencies include:
+- `torch`, `torchvision`, `torchaudio` (for deep learning models)
+- `opencv-python` (for camera use)
+- `matplotlib` (for visualization)
+- `numpy`, `pandas` (for data handling)
+- `tqdm` (for training/testing progression)
+- `Pillow` (for image processing)
+
+## 📥 Dataset
+
+You can download the dataset used for training and testing from the following link:
+[FER2013](https://www.kaggle.com/datasets/msambare/fer2013)
+
+## 🏋️ Training the Model
 
 For CNN training make you modified the python script ``scripts/models/model_trainer_torch.py`` with the model you want to train and the dataset you want your model to train on:
+
+```bash
+python train.py --epochs 50 --batch_size 32 --learning_rate 0.001 --dataset_path ./data
 ```
-python3 scripts/models/model_trainer_torch.py
 
+### Training Parameters:
+- --epochs : Number of training epochs
+- --batch_size : Batch size for training
+- --learning_rate : Learning rate for the optimizer
+- --dataset_path : Path to the dataset folder
+
+The trained model will be saved in the models/ directory.
+
+## 📊 Testing and Metrics
+Evaluate the model on a test dataset:
+
+```bash
+python test.py --model_path ./models/emotion_model.pth --dataset_path ./data/test
+```
+### Metrics Reported:
+
+- **Accuracy**: Measures the overall correct predictions.
+- **Confusion Matrix**: Shows the classification performance per emotion.
+- **Precision, Recall, F1-Score**: Evaluates the model’s effectiveness per class.
+
+## 📷 Real-Time Emotion Recognition using Webcam
+
+To use the model with a webcam:
+
+```bash
+python camera.py --model_path ./models/emotion_model.pth
 ```
 
-## Support
+Press `q` or `Esc` to exit the webcam window.
 
-If you have any questions, feel free to contact at marceau.combet@ecole.ensicaen.fr
+## 📌 Contributions
 
+Feel free to submit issues, fork the repo, and create pull requests to improve the project!
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## Author
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+- **Marceau Combet** - *Developer and research assistant*
+  - *Contact Information*: [marceau.combet@gmail.com](marceau.combet@gmail.com)
+  - *GitHub*: [Marsoss](https://github.com/Marsoss)
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## Acknowledgments
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+This project builds upon work originally conducted during my internship at **NTNU Gjøvik**, where I gained invaluable experience and insights that laid the foundation for this project. I am grateful for the opportunities and support provided by NTNU Gjøvik during my time there.
+
+I would also like to acknowledge **ENSICAEN**, where I pursued my academic studies. The knowledge and skills I acquired at ENSICAEN were instrumental in shaping my approach to this project and contributing to its development.
+
+Special thanks to the mentors who offered guidance, feedback, and encouragement throughout my journey.
 
 ## License
-For open source projects, say how it is licensed.
+
+Copyright 2023 Marceau Combet
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+### Third-Party Licenses
+
+This project uses several third-party libraries, each with its respective license:
+
+| Library         | License               | Link |
+|----------------|-----------------------|------|
+| OpenCV (opencv-python) | Apache License 2.0 | [Apache 2.0](https://opensource.org/licenses/Apache-2.0) |
+| PyTorch (torch) | BSD 3-Clause License | [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) |
+| TorchVision | BSD 3-Clause License | [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) |
+| NumPy | BSD 3-Clause License | [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) |
+| Scikit-learn | BSD 3-Clause License | [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) |
+| Matplotlib | PSF License (BSD-compatible) | [PSF License](https://matplotlib.org/stable/users/project/license.html) |
+| Pillow | PIL License (MIT-compatible) | [PIL License](https://pillow.readthedocs.io/en/stable/license.html) |
+| torchsummary | MIT License | [MIT License](https://opensource.org/licenses/MIT) |
+| polarTransform | MIT License | [MIT License](https://opensource.org/licenses/MIT) |
+| imageio | BSD 2-Clause License | [BSD 2-Clause](https://opensource.org/licenses/BSD-2-Clause) |
+| tqdm | MIT License | [MIT License](https://opensource.org/licenses/MIT) |
+| linformer | MIT License | [MIT License](https://opensource.org/licenses/MIT) |
+| vit_pytorch | MIT License | [MIT License](https://opensource.org/licenses/MIT) |
+| Tkinter | PSF License (bundled with Python) | [PSF License](https://docs.python.org/3/license.html) |
+
+For more details, please refer to the respective license links provided above.
+
