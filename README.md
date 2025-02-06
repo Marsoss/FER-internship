@@ -32,21 +32,25 @@ The main dependencies include:
 ## 📥 Dataset
 
 You can download the dataset used for training and testing from the following link: [FER2013](https://www.kaggle.com/datasets/msambare/fer2013)
-Extract it in the folder where you cloned the project.
+In the folder containing the project, create a `/datasets` folder where you can extract the downloaded files.
 
 ## 🏋️ Training the Model
 
 For CNN training make you modified the python script ``scripts/models/model_trainer_torch.py`` with the model you want to train and the dataset you want your model to train on:
 
 ```bash
-python train.py --epochs 50 --batch_size 32 --learning_rate 0.001 --dataset_path ./data
+python model_trainer_torch.py --model unet1 --dataset_path ../datasets/FER2013 --lr 0.001 --epochs 30 --patience 5 --optimizer adam --criterion cross_entropy --show True
 ```
 
 ### Training Parameters:
-- --epochs : Number of training epochs
-- --batch_size : Batch size for training
-- --learning_rate : Learning rate for the optimizer
-- --dataset_path : Path to the dataset folder
+- `--model` : Name of the model from MODELS in `model.py`
+- `--dataset_path` : Path to the dataset
+- `--lr` : Learning rate for the optimizer
+- `--epochs` : Number of training epochs
+- `--patience` : Patience for early stopping
+- `--optimizer` : Optimizer type (adam, sgd)
+- `--criterion` : Loss criterion (cross_entropy, mse)
+- `--show` : If true shows the taining results stored in `/results` directory
 
 The trained model will be saved in the models/ directory.
 
