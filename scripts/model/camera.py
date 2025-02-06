@@ -6,7 +6,7 @@ def take_picture():
     # Create a VideoCapture object to capture video from the default camera
     cap = cv2.VideoCapture(0)
 
-    tester = CNNTester('models/unet1_best_10.pth', 96, 96, 'rgb')
+    tester = CNNTester('models/unet1_FER2013.pth', tr_height=48, tr_width=48, model_color_mode='grayscale')
     tester.load_model()
     print("model loaded")
     # Check if the camera is opened successfully
@@ -24,11 +24,16 @@ def take_picture():
     # Read a frame from the video stream
     ret, frame = cap.read()
 
-    while True:
+    while cap.isOpened():
 
         flipped_frame = cv2.flip(frame, 1)
         # Show the captured frame in a window    
         cv2.imshow("Camera", flipped_frame)
+
+        # Check if the window has been closed
+        if cv2.getWindowProperty("Camera", cv2.WND_PROP_VISIBLE) < 1:
+            print("Window closed by user")
+            break
 
         # Wait for a key press
         key = cv2.waitKey(1) & 0xFF
@@ -62,6 +67,7 @@ def take_picture():
     # Close the window
     cv2.destroyAllWindows()
 
-    
-# Call the function to take a picture
-take_picture()
+
+if __name__ == "__main__":
+    # Call the function to take a picture
+    take_picture()

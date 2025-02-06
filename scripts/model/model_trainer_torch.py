@@ -429,4 +429,5 @@ def main_trainer():
     trainer.save(save_name=save_name)
     trainer.show_plot(Path(plot_save_name))
 
-main_trainer()
+if __name__ == "__main__":
+    main_trainer()

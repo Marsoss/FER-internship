@@ -15,7 +15,7 @@ class FolderSplitter:
         data = datasets.ImageFolder(root=self.data_folder, transform=transform)
 
         # Create DataLoader object
-        return DataLoader(data, batch_size=self.batch_size, shuffle=True)
+        return DataLoader(data, batch_size=self.batch_size, shuffle=True, num_workers=4)
 
 
     def split_folders(self, transform):
@@ -32,7 +32,7 @@ class FolderSplitter:
         train_data, val_data = random_split(data, [train_size, val_size], generator=generator)
 
         # Create DataLoader objects
-        train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
-        val_loader = DataLoader(val_data, batch_size=self.batch_size, shuffle=True)
+        train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, num_workers=4)
+        val_loader = DataLoader(val_data, batch_size=self.batch_size, shuffle=True, num_workers=4)
 
         return train_loader, val_loader

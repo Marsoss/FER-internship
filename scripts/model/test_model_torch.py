@@ -33,8 +33,6 @@ def choose_filename(file_filter) -> str:
     file_path = filedialog.askopenfilename(initialdir=current_dir, filetypes=file_filter)
     return os.path.relpath(file_path, current_dir)
 
-
-
 def create_preprocess_function(height:int, width:int, color_mode:str):
     size = (height, width)
     if color_mode == 'rgb':
@@ -51,15 +49,20 @@ def create_preprocess_function(height:int, width:int, color_mode:str):
                 transforms.ToTensor()
             ])
 
-class CNNTester:
-    def __init__(self, model_name:str, tr_height:int, tr_width:int, model_color_mode:str='rgb') -> None:
-        
-        #Data
-        self.__dataset:str = '../datasets/affecnet/test'
-        #self.__class_names:List[str] = ['angry','disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-        self.__class_names:List[str] = ['anger', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
-        self.__device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+def get_classes(num_classes:int) -> List[str]:
+    if num_classes==7:
+        return ['angry','disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+    else:
+        return ['anger', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 
+def num_classes_dataset(dataset:str) -> int:
+    return len(os.listdir(dataset))
+class CNNTester:
+    def __init__(self, model_name:str, dataset:str="FER2013", tr_height:int=48, tr_width:int=48, model_color_mode:str='rgb') -> None:
+        
+        # Classes
+        self.__dataset:str = f'../datasets/{dataset}/test'
+        self.__num_classes:int = num_classes_dataset(self.__dataset)
 
         #Model
         if not model_name:
@@ -71,8 +74,15 @@ class CNNTester:
         self.__tr_width:int =  tr_width
         self.__tr_size = self.__tr_width, self.__tr_height
         self.__num_channels:int = get_num_channel(color_mode=model_color_mode, model_name=model_name)
-        self.__model:nn.Module = create_model(model_name=model_name, height=tr_height, width=tr_width, num_channels=self.__num_channels, num_classes=len(self.__class_names))
+        self.__model:nn.Module = create_model(model_name=model_name, height=tr_height, width=tr_width, num_channels=self.__num_channels, num_classes=self.__num_classes)
         print(type(self.__model))
+
+        #Data
+        if self.__num_classes != self.__model.classifier[-1].out_features: # TODO: Verify classifier[-1] on other models
+            raise ValueError("Number of classes in dataset does not match model output")
+        self.__class_names:List[str] = get_classes(self.__num_classes)
+        
+        self.__device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         #One Test
         self.__image_name:str = ''
@@ -81,7 +91,7 @@ class CNNTester:
         self.__preprocess:transforms.Compose =  create_preprocess_function(tr_height, tr_width, model_color_mode)
 
     def __get_random_img(self) -> str:
-        emotion = input("Give emotion: ")
+        emotion = input(f"Give emotion among {self.__class_names}")
         if emotion not in self.__class_names:
             emotion = random.choice(self.__class_names)
 
@@ -89,15 +99,15 @@ class CNNTester:
 
         file_list = os.listdir(folder_path)
 
-        random_file = random.choice( file_list)
+        random_file = random.choice(file_list)
         print(f'{folder_path}/{random_file}')
         self.__image_name = f'{folder_path}/{random_file}'
         return emotion
 
     def predict(self) -> str:
         # Tensor transformation
-        image_tensor = self.__preprocess(self.__image)
-        image_tensor = image_tensor.unsqueeze_(0)
+        image_tensor = self.__preprocess(self.__image) # convert image to tensor
+        image_tensor = image_tensor.unsqueeze_(0) # add a batch dimension
         image_tensor = image_tensor[:,:3,:,:]
 
         # Make a prediction
@@ -228,15 +238,16 @@ def test_set(tester, matrix_save_name:str='confusion_matrix.png'):
     
 
 def main_test():
-    model_name = 'models/segnet_best.pth'
+    model_name = 'models/unet1_FER2013.pth'
 
     tester = CNNTester(model_name=model_name,  
-                    tr_height=96, 
-                    tr_width=96,
-                    model_color_mode='rgb')
+                    tr_height=48, 
+                    tr_width=48,
+                    model_color_mode='grayscale')
     
     tester.load_model()
     
     test_set(tester, 'results/Unet1_matrix.png')
 
-#main_test()
+if __name__=='__main__':
+    main_test()

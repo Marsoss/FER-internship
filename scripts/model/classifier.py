@@ -37,7 +37,7 @@ class ClassifierTrainer:
         self.__train_dataset = ImageFolder(root=train_folder_path, transform=transform)
 
         # Create the dataloader
-        self.__train_dataloader = torch.utils.data.DataLoader(self.__train_dataset, batch_size=32, shuffle=True)
+        self.__train_dataloader = torch.utils.data.DataLoader(self.__train_dataset, batch_size=32, shuffle=True, num_workers=4)
 
 
         # Extract the features and labels from the dataloader
@@ -87,7 +87,7 @@ class ClassifierTester:
         self.__test_dataset = ImageFolder(root=test_folder_path, transform=transform)
 
         # Create the dataloader
-        self.__test_dataloader = torch.utils.data.DataLoader(self.__test_dataset, batch_size=32, shuffle=True)
+        self.__test_dataloader = torch.utils.data.DataLoader(self.__test_dataset, batch_size=32, shuffle=True, num_workers=4)
 
 
         # Extract the features and labels from the dataloader
