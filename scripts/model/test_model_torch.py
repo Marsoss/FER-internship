@@ -30,7 +30,7 @@ def get_num_channel(color_mode:str, model_name:str) -> int:
     return 1 if color_mode != 'rgb' and model_name.lower() not in ['vgg', 'inception', 'resnet'] else 3
 
 def get_image_size(dataset_path) -> Tuple[int,int]:
-    folder_path = os.path.join(dataset_path,"test", "angry")
+    folder_path = os.path.join(dataset_path, "angry")
     first_image = os.listdir(folder_path)[0]
     image_path = os.path.join(folder_path, first_image)
     print(image_path)
@@ -66,12 +66,12 @@ def get_classes(num_classes:int) -> List[str]:
         return ['anger', 'contempt', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
 
 def num_classes_dataset(dataset:str) -> int:
-    return len(os.listdir(f'{dataset}/test'))
+    return len(os.listdir(dataset))
 class CNNTester:
     def __init__(self, model_name:str, dataset_path:str="../datasets/FER2013", model_color_mode:str='rgb') -> None:
         
         # Classes
-        self.__dataset:str = dataset_path
+        self.__dataset:str = f'{dataset_path}/test'
         self.__num_classes:int = num_classes_dataset(self.__dataset)
         
 

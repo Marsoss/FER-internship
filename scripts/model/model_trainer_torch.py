@@ -61,7 +61,8 @@ class CNNTrainer:
 
         #Classes
         self.__class_names:List[str] = get_class_names(self.__train_folder)
-        self.__num_classes:int = len(self.__class_names)
+        self.__num_classes:int = len(self.__class_names) # TODO: check how you get classes
+        print(f'Number of classes: {self.__num_classes}')
 
         #Images properties
         self.__image_size:Tuple[int,int] = get_image_size(self.__train_folder)
