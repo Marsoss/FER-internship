@@ -71,7 +71,7 @@ python test.py --model_path ./models/emotion_model.pth --dataset_path ./data/tes
 To use the model with a webcam:
 
 ```bash
-python camera.py --model_path ./models/emotion_model.pth
+python camera.py --model_path ./models/model_dataset.pth
 ```
 
 Press `q` or `Esc` to exit the webcam window.

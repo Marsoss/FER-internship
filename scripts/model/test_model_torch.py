@@ -189,7 +189,7 @@ class CNNTester:
             root=self.__dataset,
             transform=self.__preprocess
         )
-        self.__test_data_loader = DataLoader(self.__data, batch_size=self.__batch_size, shuffle=False)
+        self.__test_data_loader = DataLoader(self.__data, batch_size=self.__batch_size, shuffle=False, num_workers=4)
 
     def predict_folder(self) -> None:
         print("computing predictions...")
